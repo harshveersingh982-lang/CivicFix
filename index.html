@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicFix | Community Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="bg-glow"></div>
+
+    <section id="loginPage" class="auth-screen">
+        <div class="auth-box">
+            <div class="auth-header">
+                <h2 class="logo">Civic<span>Fix</span></h2>
+                <p>Community Management Portal</p>
+            </div>
+
+            <div class="auth-toggle">
+                <button id="tabUser" class="active" onclick="switchAuth('user')">Citizen</button>
+                <button id="tabAdmin" onclick="switchAuth('admin')">Admin</button>
+            </div>
+
+            <div id="userAuthForm">
+                <div id="loginFields">
+                    <div class="input-group-auth"><input type="text" id="loginUser" placeholder="Email or User ID">
+                    </div>
+                    <div class="input-group-auth"><input type="password" id="loginPass" placeholder="Password"></div>
+                    <button class="btn-primary-glow" onclick="attemptLogin('user')">Login to Dashboard</button>
+                    <p onclick="toggleReg(true)" class="toggle-link">New Resident? <span>Register Flat</span></p>
+                </div>
+
+                <div id="registerFields" style="display:none;">
+                    <div id="regStep1">
+                        <h3 style="margin-bottom: 20px;">Register Details</h3>
+                        <div class="grid-inputs">
+                            <input type="text" id="regName" placeholder="Full Name">
+                            <input type="text" id="regPhone" placeholder="Phone Number">
+                            <input type="email" id="regEmail" placeholder="Email">
+                            <input type="text" id="regBlock" placeholder="Block">
+                            <input type="text" id="regFlat" placeholder="Flat No">
+
+                            <input type="text" id="regUsername" placeholder="Choose Username">
+                            <input type="password" id="regPassword" placeholder="Create Password">
+                        </div>
+                        <textarea id="regAddress" placeholder="Full Detailed Address" rows="2"></textarea>
+                        <button class="btn-primary-glow" onclick="sendOTP()">Send Verification Code</button>
+                    </div>
+                    <div id="regStep2" style="display:none;">
+                        <h3>Verify Phone</h3>
+                        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 20px;">Enter the 6-digit code shown
+                            in the alert.</p>
+                        <input type="text" id="otpInput" placeholder="000000" maxlength="6"
+                            style="text-align:center; letter-spacing: 8px; font-weight: 800; font-size: 1.5rem;">
+                        <button class="btn-primary-glow" onclick="verifyAndRegister()">Verify & Create Account</button>
+                        <p onclick="resetReg()" class="toggle-link">Change Details</p>
+                    </div>
+                    <p onclick="toggleReg(false)" class="toggle-link">Back to <span>Login</span></p>
+                </div>
+            </div>
+
+            <div id="adminAuthForm" style="display:none;">
+                <h3>Authorized Access</h3>
+                <div class="input-group-auth"><input type="text" id="adminUser" placeholder="Admin ID "></div>
+                <div class="input-group-auth"><input type="password" id="adminPass" placeholder="Password "></div>
+                <button class="btn-primary-glow" style="background:var(--dark)" onclick="attemptLogin('admin')">Verify
+                    Identity</button>
+            </div>
+        </div>
+    </section>
+
+    <div id="mainApp" style="display:none;">
+        <nav>
+            <div class="nav-container">
+                <div class="logo">Civic<span>Fix</span></div>
+                <div class="nav-right">
+                    <span id="displayUserName">Resident</span>
+                    <button class="logout-btn" onclick="logout()">Logout</button>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container">
+            <section id="userDashboard" class="view-section">
+                <div class="hero">
+                    <h1>Welcome, <span id="welcomeName" class="text-gradient">Citizen</span></h1>
+                    <p>Flat: <span id="displayFlat">--</span> | Block: <span id="displayBlock">--</span></p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="icon-box">📊</div>
+                        <div><small>Total Reports</small>
+                            <h2 id="u-total">0</h2>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="icon-box success">✨</div>
+                        <div><small>Resolved</small>
+                            <h2 id="u-resolved">0</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-card" onclick="openModal()">
+                    <div class="plus-icon">+</div>
+                    <div class="action-text">
+                        <h3>New Report</h3>
+                        <p>Notify authorities about an issue in your block.</p>
+                    </div>
+                </div>
+
+
+                <!-- ADD THIS BELOW NEW REPORT CARD -->
+                <div class="report-list-card">
+                    <h3 style="margin-bottom:15px;">Your Submitted Reports</h3>
+                    <div id="userReports"></div>
+                </div>
+            </section>
+
+            <section id="adminDashboard" class="view-section">
+                <div class="admin-header">
+                    <h2>Authority Console</h2>
+                    <p>Click any row to inspect details.</p>
+                </div>
+                <div class="admin-stats">
+
+                    <div class="admin-stat-card">
+                        <h3>Total Reports</h3>
+                        <p id="a-total">0</p>
+                    </div>
+
+                    <div class="admin-stat-card">
+                        <h3>Pending Issues</h3>
+                        <p id="a-pending">0</p>
+                    </div>
+
+                    <div class="admin-stat-card">
+                        <h3>Resolved Issues</h3>
+                        <p id="a-resolved">0</p>
+                    </div>
+
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Issue</th>
+                                <th>Reporter</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminBody"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div id="reportModal" class="modal">
+        <div class="modal-content">
+            <h2>File New Report</h2>
+            <form id="issueForm">
+                <div class="input-group">
+                    <label>Issue Subject</label>
+                    <input type="text" id="title" placeholder="e.g. Broken Street Light" required>
+                </div>
+                <div class="input-group">
+                    <label>Priority</label>
+                    <select id="priority">
+                        <option value="1">Low</option>
+                        <option value="2">Medium</option>
+                        <option value="3">High</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Detailed Description</label>
+                    <textarea id="desc" rows="5" placeholder="Describe the issue..." required></textarea>
+                </div>
+                <div class="modal-btns">
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-primary-glow" style="margin:0">Submit Complaint</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <h2>Report Inspection</h2>
+            <div id="detailContent" class="detail-body"></div>
+            <div class="modal-btns">
+                <button class="btn-cancel" onclick="closeDetailModal()">Close</button>
+                <div id="resolveBtnArea" style="flex:2"></div>
+            </div>
+        </div>
+    </div>
+    <div id="toast" class="toast"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script1.js"></script>
+</body>
+
+</html>
